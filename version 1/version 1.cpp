@@ -700,7 +700,7 @@ void Preprocessing()
 		i++;
 	}
 	t = i - 1;//t为常量 
-//	cout<<"单词总数："<<t<<endl;
+	//cout<<"单词总数："<<t<<endl;
 
 	//频率数组初始化 
 	for (i = 1; i < t; i++)
@@ -947,8 +947,8 @@ int DeleteBST(BSTree& T, string key)
 void DeleteBST2(BSTree &T, string key) {
 	//从二叉排序树T中删除关键字等于key的结点
 	BSTree p = T; BSTree f = NULL;                     			//初始化
-	BSTree q;
-	BSTree s;
+	BSTree q=nullptr;
+	BSTree s=nullptr;
 	while (p)
 	{
 		if (p->data.key == key)
@@ -1384,7 +1384,7 @@ void Input5(ALGraph &G)
 	{
 		int k;
 		k = Hash_int(i);//判断单词首字母序号 
-		WordNode *h, *w, *e, *p, *r;
+		WordNode *h=nullptr, *w=nullptr, *e=nullptr, *p=nullptr, *r=nullptr;
 		h = G.Letter[k].firstarc;//h是单词的首字母表头结点 
 		if (h == NULL)//表头结点为空，录入 
 		{
@@ -1644,8 +1644,10 @@ int main()
 
 	//链地址法
 	ALGraph G;
-	Input5(G);
+	//Input5(G);
 
+
+	G.Letter->firstarc = nullptr;
 	//菜单 
 	while (1)
 	{
@@ -1670,7 +1672,8 @@ int main()
 		case 'a':factnum = 1; DelLowRate3(T); T = T1; system("pause"); system("cls"); break;
 		case 'b':TraverseOut2(T); system("pause"); system("cls"); break;
 		}
-		//system("pause");system("cls");
+		system("pause");
+		system("cls");
 	}
 	return 0;
 }
