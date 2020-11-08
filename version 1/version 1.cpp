@@ -682,8 +682,7 @@ void Preprocessing()
 		//TODO  可优化 : 设置标志如果为 非单词则进入 
 
 		//非字母字符移动至字符串最后 
-		for (int n = 0; n < j; n++)
-		{
+
 			for (int k = 0; k < j; k++)
 				if (LetterTank[i][k] == 35)//交换，利用Letter[0][0]当temp变量
 				{
@@ -691,7 +690,7 @@ void Preprocessing()
 					LetterTank[i][k] = LetterTank[i][k + 1];
 					LetterTank[i][k + 1] = LetterTank[0][0];
 				}
-		}
+
 		LetterTank[i] = LetterTank[i].substr(0, j - num);//去除标点符号 substr(0, j - num) -> tigers... => tigers(substr)
 		if (LetterTank[i][0] == '\0')
 		{
