@@ -673,9 +673,9 @@ void Preprocessing()
 		{
 			if (LetterTank[i][n]<'a' || LetterTank[i][n]>'z')
 			{
-				//cout<<"非字母："<<LetterTank[i][n]<<endl;
+				cout<<"非字母："<<LetterTank[i][n]<<endl;
 				LetterTank[i][n] = 35;
-				//cout<<"转化为："<< LetterTank[i][n]<<endl;
+				cout<<"转化为："<< LetterTank[i][n]<<endl;
 				num++;
 			}
 		}
