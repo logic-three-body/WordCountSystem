@@ -661,6 +661,7 @@ void Preprocessing()
 		in >> WordTank[i];
 		int j = WordTank[i].length();//单词字母数 
 		bool jud_Comma = false;
+		bool EndOfArticle = false;
 		//首字母大写转为小写 
 		for (int n = 0; n < j; n++)
 		{
@@ -685,9 +686,17 @@ void Preprocessing()
 		{
 			if (WordTank[i][n]<'a' || WordTank[i][n]>'z')
 			{
-				//cout<<"非字母："<<LetterTank[i][n]<<endl;
+				//cout<<"非字母："<<WordTank[i][n]<<endl;
 				WordTank[i][n] = 35;
-				//cout<<"转化为："<< LetterTank[i][n]<<endl;
+				//cout<<"转化为："<< WordTank[i][n]<<endl;
+
+				string tmp = WordTank[i].substr(0, i - 1);
+
+
+
+				WordTank[i] = tmp;
+				cout << "转化为：" << WordTank[i+1][n] << endl;
+
 				num++;
 				jud_Comma = true;//有标点
 			}
@@ -695,14 +704,17 @@ void Preprocessing()
 		//TODO  可优化 : 设置标志如果为 非单词则进入 
 
 		//非字母字符移动至字符串最后 
+		if (jud_Comma)
+		{
+			for (int k = 0; k < j; k++)
+				if (WordTank[i][k] == 35)//交换，利用Letter[0][0]当temp变量
+				{
+					WordTank[0][0] = WordTank[i][k];
+					WordTank[i][k] = WordTank[i][k + 1];
+					WordTank[i][k + 1] = WordTank[0][0];
+				}
+		}
 
-		for (int k = 0; k < j; k++)
-			if (WordTank[i][k] == 35)//交换，利用Letter[0][0]当temp变量
-			{
-				WordTank[0][0] = WordTank[i][k];
-				WordTank[i][k] = WordTank[i][k + 1];
-				WordTank[i][k + 1] = WordTank[0][0];
-			}
 
 		WordTank[i] = WordTank[i].substr(0, j - num);//去除标点符号 substr(0, j - num) -> tigers... => tigers(substr)
 		if (WordTank[i][0] == '\0')
@@ -713,7 +725,10 @@ void Preprocessing()
 		//统计单词数 
 		if (jud_Comma)
 		{
-			i += (num+1);//有几个标点符号说明有几个单词
+			if (!EndOfArticle)
+			{
+				i += (num + 1);//有几个标点符号说明有几个单词
+			}		
 		}
 		else
 		{
