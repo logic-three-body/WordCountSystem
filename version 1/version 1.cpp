@@ -15,7 +15,7 @@ using namespace std;
 
 int totalWordNum;//单词总数 
 int NonReaptedWords;//去重后单词数 
-string LetterTank[MAXSIZE];//存放单词 
+string WordTank[MAXSIZE];//存放单词 
 int frequency[MAXSIZE];//存放词频
 int flag_First_occur[MAXSIZE];//标记第一次出现的位置 
 double rate[MAXSIZE];
@@ -70,7 +70,7 @@ typedef struct
 int Hash_int(int a)
 {
 	int p;
-	p = LetterTank[a][0];
+	p = WordTank[a][0];
 	p = p - 96;
 	return p;
 }
@@ -145,7 +145,7 @@ void InputTree(BSTree &T)
 	T = NULL;
 	//建立一个word结点，先赋值，便于录入 
 	Word e;
-	e.key = LetterTank[1];
+	e.key = WordTank[1];
 	e.Time = 1;
 	while (i < totalWordNum)//单词数组未输入完 
 	{
@@ -154,7 +154,7 @@ void InputTree(BSTree &T)
 		InitTree(temp);
 		temp = T;
 		//判断是否重复 
-		int res = Input3(temp, LetterTank[i]); //在此统计词频，若重复频次就加1。
+		int res = Input3(temp, WordTank[i]); //在此统计词频，若重复频次就加1。
 
 		if (res == -1)//如果不重复，就录入.
 		{
@@ -164,7 +164,7 @@ void InputTree(BSTree &T)
 
 		//下一次的输入 
 		i++;
-		e.key = LetterTank[i];
+		e.key = WordTank[i];
 		e.Time = 1;//初次输入，词频都为1
 	}
 }
@@ -287,17 +287,17 @@ void Input1(SSTable &L)
 	int i = 1;
 	while (i <= totalWordNum)
 	{
-		if ((LetterTank[i][0] < '0' && !CheckSqList(L, LetterTank[i])) || (LetterTank[i][0] > '9' && !CheckSqList(L, LetterTank[i])))//不重复录入 
+		if ((WordTank[i][0] < '0' && !CheckSqList(L, WordTank[i])) || (WordTank[i][0] > '9' && !CheckSqList(L, WordTank[i])))//不重复录入 
 		{
 			L.length++;
-			L.R[L.length].key = LetterTank[i];
+			L.R[L.length].key = WordTank[i];
 			L.R[L.length].Time = 1;//不能++ 
 			//标记位置
 			flag_First_occur[i] = 1;
 		}
-		else if ((LetterTank[i][0] < '0'&&CheckSqList(L, LetterTank[i])) || (LetterTank[i][0] > '9'&&CheckSqList(L, LetterTank[i])))//重复就只统计 
+		else if ((WordTank[i][0] < '0'&&CheckSqList(L, WordTank[i])) || (WordTank[i][0] > '9'&&CheckSqList(L, WordTank[i])))//重复就只统计 
 		{
-			L.R[CheckSqList(L, LetterTank[i])].Time++;//词频统计  
+			L.R[CheckSqList(L, WordTank[i])].Time++;//词频统计  
 		}
 		i++;
 	}
@@ -354,12 +354,12 @@ void Input2(LinkList &L)
 	r = L;
 	for (i = 1; i <= totalWordNum; i++)
 	{
-		if (Locate(L, LetterTank[i]) == 0)
+		if (Locate(L, WordTank[i]) == 0)
 		{
 			//未重复的部分，也就是第一次录入的部分 
 			p = new LNode;
 			p->data.Time = 1;	//结点初始化频次为1 
-			p->data.key = LetterTank[i];
+			p->data.key = WordTank[i];
 			p->next = NULL;
 			r->next = p;
 			r = p;
@@ -529,7 +529,7 @@ void PrintText()
 	int i = 1;
 	while (i <= totalWordNum)
 	{
-		cout << LetterTank[i] << " ";
+		cout << WordTank[i] << " ";
 		i++;
 	}
 	cout << endl;
@@ -541,8 +541,8 @@ void PrintWord()
 	while (i <= totalWordNum)
 	{
 
-		cout << "单词序号：" << i << "   /" << LetterTank[i] << "/" << " ";
-		cout << LetterTank[i].length() << endl;
+		cout << "单词序号：" << i << "   /" << WordTank[i] << "/" << " ";
+		cout << WordTank[i].length() << endl;
 		i++;
 	}
 	if (i == totalWordNum)cout << "单词数组已全部打印" << endl;
@@ -658,48 +658,69 @@ void Preprocessing()
 	int i = 1;//从第一个单词开始，str[0]空置不用 
 	while (!in.eof())
 	{
-		in >> LetterTank[i];
-		int j = LetterTank[i].length();//单词字母数 
+		in >> WordTank[i];
+		int j = WordTank[i].length();//单词字母数 
+		bool jud_Comma = false;
 		//首字母大写转为小写 
 		for (int n = 0; n < j; n++)
 		{
-			if (LetterTank[i][n] >= 'A'&&LetterTank[i][n] <= 'Z')
-				LetterTank[i][n] = LetterTank[i][n] + 32;
+			if (WordTank[i][n] >= 'A'&&WordTank[i][n] <= 'Z')
+				WordTank[i][n] = WordTank[i][n] + 32;
 		}
 
 		//非字母字符标记统计
+		//TODO soultion 1 : 
+		/*
+		当找到字符的不是字母，有两种情况：
+		1.到达文章末尾  -> stranger!
+		2.衔接多个单词  -> tigers,two / Hello!Thanks,boy! 
+		
+		第一种情况  s t r ... e r ! '\0'  这时候只需去除标点即可
+		第二种情况 将单词切片 substr() -> tigers two :
+		 LetterTank[i+1]=LetterTank[i+1].substr(0,i-1)
+		 ++i
+		*/
 		int num = 0;
 		for (int n = 0; n < j; n++)
 		{
-			if (LetterTank[i][n]<'a' || LetterTank[i][n]>'z')
+			if (WordTank[i][n]<'a' || WordTank[i][n]>'z')
 			{
 				//cout<<"非字母："<<LetterTank[i][n]<<endl;
-				LetterTank[i][n] = 35;
+				WordTank[i][n] = 35;
 				//cout<<"转化为："<< LetterTank[i][n]<<endl;
 				num++;
+				jud_Comma = true;//有标点
 			}
 		}
 		//TODO  可优化 : 设置标志如果为 非单词则进入 
 
 		//非字母字符移动至字符串最后 
 
-			for (int k = 0; k < j; k++)
-				if (LetterTank[i][k] == 35)//交换，利用Letter[0][0]当temp变量
-				{
-					LetterTank[0][0] = LetterTank[i][k];
-					LetterTank[i][k] = LetterTank[i][k + 1];
-					LetterTank[i][k + 1] = LetterTank[0][0];
-				}
+		for (int k = 0; k < j; k++)
+			if (WordTank[i][k] == 35)//交换，利用Letter[0][0]当temp变量
+			{
+				WordTank[0][0] = WordTank[i][k];
+				WordTank[i][k] = WordTank[i][k + 1];
+				WordTank[i][k + 1] = WordTank[0][0];
+			}
 
-		LetterTank[i] = LetterTank[i].substr(0, j - num);//去除标点符号 substr(0, j - num) -> tigers... => tigers(substr)
-		if (LetterTank[i][0] == '\0')
+		WordTank[i] = WordTank[i].substr(0, j - num);//去除标点符号 substr(0, j - num) -> tigers... => tigers(substr)
+		if (WordTank[i][0] == '\0')
 		{
 			//cout<<"空格位置："<<i<<endl;//system("pause");
 			i--;//如果当前接收的是一个空串，则接受下一个字符串 
 		}
 		//统计单词数 
-		i++;
+		if (jud_Comma)
+		{
+			i += (num+1);//有几个标点符号说明有几个单词
+		}
+		else
+		{
+			i++;
+		}
 	}
+	//TODO 有问题,比如 tigers,two会被当成一个单词
 	totalWordNum = i - 1;//t为常量 
 	//cout<<"单词总数："<<t<<endl;
 
@@ -948,8 +969,8 @@ int DeleteBST(BSTree& T, string key)
 void DeleteBST2(BSTree &T, string key) {
 	//从二叉排序树T中删除关键字等于key的结点
 	BSTree p = T; BSTree f = NULL;                     			//初始化
-	BSTree q=nullptr;
-	BSTree s=nullptr;
+	BSTree q = nullptr;
+	BSTree s = nullptr;
 	while (p)
 	{
 		if (p->data.key == key)
@@ -1179,10 +1200,10 @@ void Input4(HashTable HT[])
 	//构建 
 	for (int i = 1; i <= 5000; i++)//300-5000
 	{
-		if (LetterTank[i][0] == '\0')break; //或者i==t 
+		if (WordTank[i][0] == '\0')break; //或者i==t 
 		while (1)
 		{
-			int res = CheckHash(HT, LetterTank[i]);//在此实现 
+			int res = CheckHash(HT, WordTank[i]);//在此实现 
 			if (res == -1)break;
 			else
 			{
@@ -1191,14 +1212,14 @@ void Input4(HashTable HT[])
 			}
 		}
 		int n;
-		n = LetterTank[i][0] - 'a';
+		n = WordTank[i][0] - 'a';
 		int max = 100 * n + 100;
 		int p = max - 100 + 1;//从1开始,0开始会有错误 
 		while (p < max)
 		{
 			if (HT[p].key == "\0")//用checkhash记录频次 &&CheckHash(HT,str[i])==-1
 			{
-				HT[p].key = LetterTank[i];
+				HT[p].key = WordTank[i];
 				HT[p].Time = 1;
 				//cout<<HT[p].key<<"已录入第"<<p<<"个位置"<<endl;
 				break;
@@ -1385,12 +1406,12 @@ void Input5(ALGraph &G)
 	{
 		int k;
 		k = Hash_int(i);//判断单词首字母序号 
-		WordNode *h=nullptr, *w=nullptr, *e=nullptr, *p=nullptr, *r=nullptr;
+		WordNode *h = nullptr, *w = nullptr, *e = nullptr, *p = nullptr, *r = nullptr;
 		h = G.Letter[k].firstarc;//h是单词的首字母表头结点 
 		if (h == NULL)//表头结点为空，录入 
 		{
 			p = new WordNode;
-			p->data.key = LetterTank[i];
+			p->data.key = WordTank[i];
 			p->data.Time = frequency[i];
 			p->nextarc = NULL;
 			G.Letter[k].firstarc = p;
@@ -1402,7 +1423,7 @@ void Input5(ALGraph &G)
 			while (h != NULL)
 			{
 				r = h;
-				if (h->data.key == LetterTank[i])//遍历一个首字母的链表，如果相同，频次自加 
+				if (h->data.key == WordTank[i])//遍历一个首字母的链表，如果相同，频次自加 
 				{
 					h->data.Time++;
 					flag = 1;
@@ -1412,7 +1433,7 @@ void Input5(ALGraph &G)
 			if (flag == 0)//如果没有相同的，就录入 
 			{
 				p = new WordNode;
-				p->data.key = LetterTank[i];
+				p->data.key = WordTank[i];
 				p->data.Time = frequency[i];
 				p->nextarc = NULL;
 				r->nextarc = p;
